@@ -110,7 +110,7 @@ static void (*minunit_teardown)(void) = NULL;
 
 /*  Test runner */
 #define MU_RUN_TEST(test) MU__SAFE_BLOCK(\
-	if (minunit_real_timer==0 && minunit_proc_timer==0) {\
+	if (minunit_real_timer<1e-10 && minunit_proc_timer<1e-10) {\
 		minunit_real_timer = mu_timer_real();\
 		minunit_proc_timer = mu_timer_cpu();\
 	}\

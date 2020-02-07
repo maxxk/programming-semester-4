@@ -73,6 +73,8 @@ enum forth_result {
 
 Для запуска тестов: `make check`
 
+В тестах используется библиотека minunit: https://github.com/siu/minunit
+
 Для анализа покрытия кода тестами: `make coverage`
 
 # Команды
