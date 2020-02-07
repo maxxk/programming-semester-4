@@ -35,5 +35,7 @@ void compile_end(struct forth *forth);
 void rpush(struct forth *forth);
 void rpop(struct forth *forth);
 void rtop(struct forth *forth);
+void rshow(struct forth *forth);
 
+void next(struct forth *forth);
 void interpreter_stub(struct forth *forth);

@@ -45,6 +45,9 @@ void words_add(struct forth *forth)
     forth_add_codeword(forth, ">r", rpush);
     forth_add_codeword(forth, "r>", rpop);
     forth_add_codeword(forth, "i", rtop);
+    forth_add_codeword(forth, "rshow", rshow);
+    
+    forth_add_codeword(forth, "next", next);
     
     status = forth_add_compileword(forth, "square", square);
     assert(!status);
@@ -238,6 +241,20 @@ void rpop(struct forth *forth) {
 void rtop(struct forth  *forth) {
     assert(forth->rp > forth->rp0+1);
     forth_push(forth, forth->rp[-2]);
+}
+
+void rshow(struct forth *forth) {
+    const cell *c = forth->rp0;
+    while (c < forth->rp) {
+        cell_print(*c);
+        c += 1;
+    }
+    printf("(r-top)\n");
+}
+
+void next(struct forth *forth)
+{
+    forth->executing += 1;
 }
 
 void interpreter_stub(struct forth *forth)
