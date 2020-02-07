@@ -29,7 +29,18 @@ build/cforth: $(CFORTH_MODULES:%=build/%.o)
 # -std=c99 -pedantic -Wall -Werror — приблизить поведение компилятора
 #     к настройкам в дисплейных классах
 # -I./include — искать файлы " … .h" в каталоге include
-CFLAGS_COMMON = -MMD -std=c99 -pedantic -Wall -Werror -I./include
+# Как и в языке C, Python и многих других,
+# обратная косая черта (backslash, \ ) в самом конце строки
+# обозначает перенос строки.
+CFLAGS_COMMON = -MMD  -I./include \
+	-std=c99 -pedantic -Wall -Werror -Wextra -pedantic-errors \
+	-Wpointer-arith -Waggregate-return \
+	-Wstrict-prototypes -Wmissing-declarations \
+	-Wlong-long -Winline -Wredundant-decls \
+	-Wcast-align -Wfloat-equal -D__STRICT_ANSI__
+# Про предупреждения можно почитать в руководстве GCC:
+# https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
+
 # Настройки компилятора по умолчанию (изменяемые)
 # -g — сгенерировать информацию для отладки
 # -O0 — отключить все оптимизации
@@ -46,7 +57,7 @@ build/%.c.o: src/%.c
 	$(CC) $(CFLAGS_COMMON) $(CFLAGS) -c $< -o $@
 
 build/test: src/test.c
-	$(CC) $(CFLAGS_COVERAGE) $(CFLAGS_COMMON) $(CFLAGS) $< -o $@ -w
+	$(CC) $(CFLAGS_COVERAGE) $(CFLAGS_COMMON) $(CFLAGS) $< -o $@
 
 # Очистка — удаляем всё из каталога build
 clean:

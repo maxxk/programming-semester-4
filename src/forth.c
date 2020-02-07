@@ -112,7 +112,7 @@ void cell_print(cell cell) {
 enum forth_result read_word(FILE* source,
     size_t buffer_size, char buffer[buffer_size], size_t *length)
 {
-    int l = 0;
+    size_t l = 0;
     int c; 
     while ((c = fgetc(source)) != EOF && l < buffer_size) {
         // isspace(c) → l == 0
@@ -173,7 +173,7 @@ static void forth_run_number(struct forth *forth,
 {
     char* end;
     intptr_t number = strtoiptr(word_buffer, &end, 10); // FIXME: BASE can be internal variable
-    if (end - word_buffer < length) {
+    if (end - word_buffer < (int)length) {
         fprintf(stderr, "Unknown word: '%.*s'\n", (int)length, word_buffer);
     } else {
         forth_push(forth, number);
