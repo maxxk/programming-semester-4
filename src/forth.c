@@ -245,7 +245,6 @@ static void forth_run_word(struct forth *forth, const struct word *word)
             forth->executing = (struct word**)word_code(word);
         }
 
-        if (!forth->executing) { break; }
         word = *forth->executing;
     } while (word != forth->stopword);
 }
