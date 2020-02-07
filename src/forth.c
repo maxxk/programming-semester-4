@@ -11,7 +11,7 @@ static uintptr_t align(uintptr_t value, uint8_t alignment);
 static intptr_t strtoiptr(const char* ptr, char** endptr, int base);
 
 int forth_init(struct forth *forth, FILE *input,
-    size_t memory, size_t stack)
+    size_t memory, size_t stack, size_t ret)
 {
     forth->memory_size = memory;
     forth->memory = malloc(forth->memory_size * sizeof(cell));
@@ -21,7 +21,13 @@ int forth_init(struct forth *forth, FILE *input,
     forth->sp0 = malloc(forth->data_size * sizeof(cell));
     forth->sp = forth->sp0;
 
+    forth->return_size = ret;
+    forth->rp0 = malloc(forth->return_size * sizeof(cell));
+    forth->rp = forth->rp0;
+
     forth->latest = NULL;
+    forth->executing = NULL;
+    forth->is_compiling = false;
     forth->input = input;
 
     return forth->memory == NULL || forth->sp0 == NULL;
@@ -48,6 +54,21 @@ cell forth_pop(struct forth *forth)
     return *forth->sp;
 }
 
+void forth_push_return(struct forth *forth, cell value)
+{
+    assert(forth->rp < forth->rp0 + forth->return_size);
+    forth->rp[0] = value;
+    forth->rp += 1;
+    //printf(">r %lx %ld\n", value, forth->rp - forth->rp0);
+}
+
+cell forth_pop_return(struct forth *forth) {
+    assert(forth->rp > forth->rp0);
+    forth->rp -= 1;
+    //printf("r> %lx %ld\n", forth->rp[0], forth->rp - forth->rp0);
+    return forth->rp[0];
+}
+
 void forth_emit(struct forth *forth, cell value)
 {
     *(forth->memory_free) = value;
@@ -64,6 +85,8 @@ struct word* word_add(struct forth *forth,
     struct word* word = (struct word*)forth->memory_free;
     word->next = forth->latest;
     word->length = length;
+    word->hidden = false;
+    word->immediate = false;
     memcpy(word->name, name, length);
     forth->memory_free = (cell*)word_code(word);
     assert((char*)forth->memory_free >= word->name + length);
@@ -81,7 +104,8 @@ const struct word* word_find(const struct word* word,
     uint8_t length, const char name[length])
 {
     while (word) {
-        if (length == word->length
+        if (!word->hidden
+            && length == word->length
             && ! strncmp(word->name, name, length)) {
             return word;
         }
@@ -98,11 +122,29 @@ static uintptr_t align(uintptr_t value, uint8_t alignment)
 void forth_add_codeword(struct forth *forth,
     const char* name, const function handler)
 {
-    word_add(forth, strlen(name), name);
+    struct word *word = word_add(forth, strlen(name), name);
+    word->compiled = false;
     assert(strlen(name) <= 32);
     forth_emit(forth, (cell)handler);
 }
 
+
+int forth_add_compileword(struct forth *forth,
+    const char *name, const char** words)
+{
+    struct word *word = word_add(forth, strlen(name), name);
+    word->compiled = true;
+    while (*words) {
+        const struct word* word = word_find(forth->latest, strlen(*words), *words);
+        if (!word) {
+            return 1;
+        }
+        // printf("Compile %s, writing %s as %p\n", name, *words, (void*)word);
+        forth_emit(forth, (cell)word);
+        words += 1;
+    }
+    return 0;
+}
 
 void cell_print(cell cell) {
     printf("%"PRIdPTR" ", cell);
@@ -139,6 +181,7 @@ enum forth_result read_word(FILE* source,
     return FORTH_EOF;
 }
 
+static void forth_run_word(struct forth *forth, const struct word *word);
 static void forth_run_number(struct forth *forth,
     size_t length, const char word_buffer[length]);
 
@@ -158,10 +201,10 @@ enum forth_result forth_run(struct forth* forth)
         const struct word* word = word_find(forth->latest, length, word_buffer);
         if (word == NULL) {
             forth_run_number(forth, length, word_buffer);
+        } else if (word->immediate || !forth->is_compiling) {
+            forth_run_word(forth, word);
         } else {
-            // ISO C forbids conversion of object pointer to function pointer type
-            const function code = ((struct { function fn; }*)word_code(word))->fn;
-            code(forth);
+            forth_emit(forth, (cell)word);
         }
     }
     return read_result;
@@ -174,9 +217,37 @@ static void forth_run_number(struct forth *forth,
     intptr_t number = strtoiptr(word_buffer, &end, 10); // FIXME: BASE can be internal variable
     if (end - word_buffer < (int)length) {
         fprintf(stderr, "Unknown word: '%.*s'\n", (int)length, word_buffer);
-    } else {
+    } else if (!forth->is_compiling) {
         forth_push(forth, number);
+    } else {
+        const struct word* word = word_find(forth->latest, strlen("lit"), "lit");
+        assert(word);
+        forth_emit(forth, (cell)word);
+        forth_emit(forth, number);
     }
+}
+
+static void forth_run_word(struct forth *forth, const struct word *word)
+{
+    do {
+        //printf("%.*s\n", (int)word->length, word->name);
+        // FIXME: (1 балл) как избавиться от этого условия
+        // и всегда безусловно увеличивать forth->executing на 1?
+        if (*forth->executing != forth->stopword) {
+            forth->executing += 1;
+        }
+        if (!word->compiled) {
+            // ISO C forbids conversion of object pointer to function pointer type
+            const function code = ((struct { function fn; }*)word_code(word))->fn;
+            code(forth);
+        } else {
+            forth_push_return(forth, (cell)forth->executing);
+            forth->executing = (struct word**)word_code(word);
+        }
+
+        if (!forth->executing) { break; }
+        word = *forth->executing;
+    } while (word != forth->stopword);
 }
 
 static intptr_t strtoiptr(const char* ptr, char** endptr, int base) {

@@ -11,20 +11,29 @@ typedef intptr_t cell;
 
 struct word {
     struct word *next;
+    bool compiled;
+    bool hidden;
+    bool immediate;
     uint8_t length;
     char name[];
 };
 
 struct forth {
+    struct word **executing;
     cell *sp;
+    cell *rp;
     cell *memory;
     struct word *latest;
-    
+    struct word *stopword;
+    bool is_compiling;
+
     FILE* input;
 
     cell *memory_free;
     cell *sp0;
+    cell *rp0;
     size_t memory_size;
+    size_t return_size;
     size_t data_size;
 };
 
@@ -38,15 +47,19 @@ const struct word* word_find(const struct word* first,
 typedef void (*function)(struct forth *forth);
 
 int forth_init(struct forth *forth, FILE* input,
-    size_t memory, size_t stack);
+    size_t memory, size_t stack, size_t ret);
 void forth_free(struct forth *forth);
 
 void forth_push(struct forth *forth, cell value);
 cell forth_pop(struct forth *forth);
 cell* forth_top(struct forth *forth);
+void forth_push_return(struct forth *forth, cell value);
+cell forth_pop_return(struct forth *forth);
 void forth_emit(struct forth *forth, cell value);
 void forth_add_codeword(struct forth *forth,
     const char* name, const function handler);
+int forth_add_compileword(struct forth *forth,
+    const char* name, const char** words);
 
 void cell_print(cell c);
 
