@@ -13,7 +13,7 @@ function installCodium() {
 
 
     echo "In directory: "
-    cd "$TMPDIR/codium"
+    pushd "$TMPDIR/codium"
     echo "Downloading"
     curl -O -L https://istina.msu.ru/media/common/VSCodium-linux-x64-$VERSION.tar.gz
     echo "Unpacking"
@@ -28,12 +28,11 @@ function installCodium() {
 
     $CODIUM --force --install-extension eamodio.gitlens
     $CODIUM --force --install-extension ms-vscode.cpptools
+    popd
 }
 
-if [ -f $DIR/codium ]; then
-    $CODIUM "$@"
-else
+if [ ! -f $DIR/codium ]; then
     installCodium
-    $CODIUM "$@"
 fi
 
+$CODIUM "$@"

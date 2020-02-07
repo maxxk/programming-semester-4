@@ -46,7 +46,7 @@ build/%.c.o: src/%.c
 	$(CC) $(CFLAGS_COMMON) $(CFLAGS) -c $< -o $@
 
 build/test: src/test.c
-	$(CC) $(CFLAGS_COVERAGE) $(CFLAGS_COMMON) $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS_COVERAGE) $(CFLAGS_COMMON) $(CFLAGS) $< -o $@ -w
 
 # Очистка — удаляем всё из каталога build
 clean:
@@ -67,9 +67,9 @@ check: build build/test
 
 # Команда для оценки уровня покрытия кода тестами
 .PHONY = coverage
-coverage: check
+coverage: build/test check
 	cd build && ../bin/gcovr.sh -r .. --html --html-details -o coverage.html
-	# gcovr -r .. --html --html-details -o coverage.html
+	# gcovr -r . --html --html-details -o build/coverage.html
 	# kcov --include-path=./src build/coverage $<
 
 build:
