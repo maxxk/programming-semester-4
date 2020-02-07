@@ -37,5 +37,17 @@ void rpop(struct forth *forth);
 void rtop(struct forth *forth);
 void rshow(struct forth *forth);
 
+void memory_read(struct forth *forth);
+void memory_write(struct forth *forth);
+void here(struct forth *forth);
+void branch(struct forth *forth);
+void branch0(struct forth *forth);
+void immediate(struct forth *forth);
+
+void next_word(struct forth *forth);
+void find(struct forth *forth);
+void _word_code(struct forth *forth);
+void comma(struct forth *forth);
+
 void next(struct forth *forth);
 void interpreter_stub(struct forth *forth);
