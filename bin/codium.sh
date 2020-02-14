@@ -21,7 +21,12 @@ function installCodium() {
 
     mkdir -p extensions
     mkdir -p data/user-data/User/
-    
+
+    ln -s "$TMPDIR/codium" ~/.vscode/
+    mkdir "$TMPDIR/codium/dot-config"
+    ln -s "$TMPDIR/codium/dot-config" ~/.config/Code
+    mkdir "$TMPDIR/codium/dot-cache"
+    ln -s "$TMPDIR/codium/dot-cache" ~/.cache/vscode-cpptools    
     # Save preferences
     ln -s ~/.config/VSCodium-portable/keybindins.json data/user-data/User/
     ln -s ~/.config/VSCodium-portable/settings.json data/user-data/User/
