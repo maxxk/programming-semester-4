@@ -2,7 +2,6 @@
 #include <assert.h>
 #include <ctype.h>
 #include <inttypes.h>
-#include <iso646.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
