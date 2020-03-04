@@ -37,6 +37,7 @@ void forth_free(struct forth *forth)
 {
     free(forth->sp0);
     free(forth->memory);
+    free(forth->rp0);
     *forth = (struct forth) {0};
 }
 
