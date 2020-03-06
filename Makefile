@@ -43,7 +43,9 @@ CFLAGS_COMMON = -MMD  -I./include \
 	-Wpointer-arith -Waggregate-return \
 	-Wstrict-prototypes -Wmissing-declarations \
 	-Wlong-long -Winline -Wredundant-decls \
-	-Wcast-align -Wfloat-equal -D__STRICT_ANSI__
+	-Wcast-align -Wfloat-equal -D__STRICT_ANSI__ \
+	-Wbad-function-cast
+
 # Про предупреждения можно почитать в руководстве GCC:
 # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
 
