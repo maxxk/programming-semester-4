@@ -8,7 +8,7 @@
 void words_add(struct forth *forth)
 {
     int status = 0;
-    static const char* square[] = { "dup", "*", "exit" };
+    static const char* square[] = { "dup", "*", "exit", 0 };
 
     forth_add_codeword(forth, "interpret", interpreter_stub);
     forth->stopword = forth->latest;
