@@ -206,7 +206,8 @@ void within(struct forth *forth) {
 }
 
 void forth_exit(struct forth *forth) {
-    forth->executing = (struct word**)forth_pop_return(forth);
+    cell return_address = forth_pop_return(forth);
+    forth->executing = (struct word**)return_address;
 }
 
 void literal(struct forth *forth)
@@ -266,14 +267,16 @@ void rshow(struct forth *forth) {
 
 void memory_read(struct forth *forth)
 {
-    forth_push(forth, *(cell*)(forth_pop(forth)));
+    cell address = forth_pop(forth);
+    forth_push(forth, *(cell*)address);
 }
 
 void memory_write(struct forth *forth)
 {
-    cell* address = (cell*)forth_pop(forth);
+    cell address = forth_pop(forth);
+    cell* address_as_pointer = (cell*)address;
     cell value = forth_pop(forth);
-    *address = value;
+    *address_as_pointer = value;
 }
 
 void here(struct forth *forth)
@@ -313,15 +316,17 @@ void next_word(struct forth *forth)
 
 void find(struct forth *forth)
 {
-    uint8_t length = (uint8_t)forth_pop(forth);
-    const char *name = (const char*)forth_pop(forth);
+    cell length = forth_pop(forth);
+    cell name_address = forth_pop(forth);
+    const char *name = (const char *)name_address;
     const struct word *word = word_find(forth->latest, length, name);
     forth_push(forth, (cell)word);
 }
 
 void _word_code(struct forth *forth)
 {
-    const struct word* word = (const struct word*)forth_pop(forth);
+    cell word_address = forth_pop(forth);
+    const struct word* word = (const struct word*)word_address;
     const void *code = word_code(word);
     forth_push(forth, (cell)code);
 }
