@@ -13,5 +13,6 @@ int main(void)
     forth_init(&forth, stdin, MAX_DATA, MAX_STACK, MAX_RETURN);
     words_add(&forth);
     forth_run(&forth);
+    forth_free(&forth);
     return 0;
 }
