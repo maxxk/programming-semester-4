@@ -61,7 +61,7 @@ MU_TEST(forth_tests_codeword) {
 
 MU_TEST(forth_tests_compileword) {
     struct forth forth = {0};
-    forth_init(&forth, stdin, 100, 100, 100);
+    forth_init(&forth, stdin, 200, 200, 200);
     words_add(&forth);
 
     const struct word *dup = word_find(forth.latest, strlen("dup"), "dup");
@@ -79,7 +79,7 @@ MU_TEST(forth_tests_compileword) {
 
 MU_TEST(forth_tests_literal) {
     struct forth forth = {0};
-    forth_init(&forth, stdin, 100, 100, 100);
+    forth_init(&forth, stdin, 200, 200, 200);
     words_add(&forth);
 
     const struct word *literal = word_find(forth.latest, strlen("lit"), "lit");
