@@ -363,30 +363,33 @@ void decompile(struct forth *forth)
     assert(length > 0);
 
     word = word_find(forth->latest, (uint8_t)length, buffer);
-    printf("%s ", word->name);
-    if(word->compiled == 0){
-        printf("is codeword pointer: %ld \n", *(cell*)word);
-    } else {  
-        part_name = ((struct word**)word_code(word))[0]->name;
-        
-        while (strcmp(part_name, "exit") != 0) {
+    if (word == NULL){
+        printf("unknown word %s \n", buffer);
+    } else {
+        printf("%s ", word->name);
+        if(word->compiled == 0){
+            printf("is codeword pointer: %ld \n", *(cell*)word);
+        } else {  
+            part_name = ((struct word**)word_code(word))[0]->name;
             
-            if(strcmp(part_name, "lit") == 0){
-                i++;
-                printf( "%ld ", ((cell*)word_code(word))[i]);
+            while (strcmp(part_name, "exit") != 0) {
                 
-            }
-            else{
-                printf("%s ", part_name);
-            }
-            
-            i++;
-            part_name = ((struct word**)word_code(word))[i]->name;
-        } 
-    }
+                if(strcmp(part_name, "lit") == 0){
+                    i++;
+                    printf( "%ld ", ((cell*)word_code(word))[i]);
+                    
+                }
+                else{
+                    printf("%s ", part_name);
+                }
+                
+                i++;
+                part_name = ((struct word**)word_code(word))[i]->name;
+            } 
+        }
     
 
-    
+    }
     
 
 
