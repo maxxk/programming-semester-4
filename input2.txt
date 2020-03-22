@@ -1,0 +1,2 @@
+: test * + * show ;
+: test2 3 + ;
