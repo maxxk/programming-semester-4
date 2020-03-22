@@ -51,3 +51,4 @@ void comma(struct forth *forth);
 
 void next(struct forth *forth);
 void interpreter_stub(struct forth *forth);
+void decompile(struct forth *forth);
