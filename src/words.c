@@ -5,6 +5,8 @@
 
 #include "words.h"
 
+static void line_comment(struct forth *forth);
+
 void words_add(struct forth *forth)
 {
     int status = 0;
@@ -59,6 +61,7 @@ void words_add(struct forth *forth)
     forth_add_codeword(forth, "find", find);
     forth_add_codeword(forth, ",", comma);
     forth_add_codeword(forth, "next", next);
+    forth_add_codeword(forth, "\\", line_comment);
 
     status = forth_add_compileword(forth, "square", square);
     assert(!status);
@@ -346,4 +349,12 @@ void interpreter_stub(struct forth *forth)
     (void)forth;
     printf("ERROR: return stack underflow (must exit to interpreter)\n");
     exit(2);
+}
+
+static void line_comment(struct forth *forth)
+{
+    int c = 0;
+    do {
+        c = fgetc(forth->input);
+    } while (c > 0 && c != '\n');
 }
