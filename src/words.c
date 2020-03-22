@@ -5,8 +5,6 @@
 
 #include "words.h"
 
-static void line_comment(struct forth *forth);
-
 void words_add(struct forth *forth)
 {
     int status = 0;
@@ -61,7 +59,7 @@ void words_add(struct forth *forth)
     forth_add_codeword(forth, "find", find);
     forth_add_codeword(forth, ",", comma);
     forth_add_codeword(forth, "next", next);
-    forth_add_codeword(forth, "\\", line_comment);
+    forth_add_codeword(forth, "see", decompile);
 
     status = forth_add_compileword(forth, "square", square);
     assert(!status);
@@ -351,10 +349,48 @@ void interpreter_stub(struct forth *forth)
     exit(2);
 }
 
-static void line_comment(struct forth *forth)
+void decompile(struct forth *forth)
 {
-    int c = 0;
-    do {
-        c = fgetc(forth->input);
-    } while (c > 0 && c != '\n');
+    char buffer[MAX_WORD+1];
+    size_t length;
+    const struct word* word;
+    char* part_name;
+    
+    int i =0;
+    
+    
+    read_word(forth->input, MAX_WORD, buffer, &length);
+    assert(length > 0);
+
+    word = word_find(forth->latest, (uint8_t)length, buffer);
+    printf("%s ", word->name);
+    if(word->compiled == 0){
+        printf("is codeword pointer: %ld \n", *(cell*)word);
+    } else {  
+        part_name = ((struct word**)word_code(word))[0]->name;
+        
+        while (strcmp(part_name, "exit") != 0) {
+            
+            if(strcmp(part_name, "lit") == 0){
+                i++;
+                printf( "%ld ", ((cell*)word_code(word))[i]);
+                
+            }
+            else{
+                printf("%s ", part_name);
+            }
+            
+            i++;
+            part_name = ((struct word**)word_code(word))[i]->name;
+        } 
+    }
+    
+
+    
+    
+
+
+
 }
+
+
