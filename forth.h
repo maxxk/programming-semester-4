@@ -62,6 +62,7 @@ int forth_add_compileword(struct forth *forth,
     const char* name, const char** words);
 void save_words(struct forth *forth);
 void load_words(struct forth *forth);
+void decompile_words(struct forth *forth);
 
 void cell_print(cell c);
 

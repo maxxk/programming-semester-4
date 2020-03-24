@@ -63,8 +63,45 @@ void words_add(struct forth *forth)
     forth_add_codeword(forth, "save", save_words);
     forth_add_codeword(forth, "load", load_words);
 
+    forth_add_codeword(forth, "see", decompile_words);
+
     status = forth_add_compileword(forth, "square", square);
     assert(!status);
+}
+
+void decompile_words(struct forth* forth) {
+    char buffer[MAX_WORD+1];
+    size_t length;
+    char* piece_of_complex_word;
+    int i = 0;
+
+    read_word(forth->input, MAX_WORD, buffer, &length);
+    uint8_t u_length = (uint8_t)length;
+
+    const struct word *x_word = word_find(forth->latest, u_length, buffer);
+    if (x_word == NULL){
+        printf("unknown word %s \n", buffer);
+    } else {
+        printf("%s : ", x_word->name);
+        if(!x_word->compiled) {
+            printf("It is codeword, its pointer is %ld", *(cell*)(x_word));
+        } else {
+            piece_of_complex_word = ((struct word**)word_code(x_word))[0]->name;
+
+            while(strcmp(piece_of_complex_word, "exit") != 0){
+                i++;
+                if(strcmp(piece_of_complex_word, "lit") == 0){
+                    printf("%ld ", ((cell*)word_code(x_word))[i]);
+                    i++;
+                } else {
+                    printf("%s ", piece_of_complex_word);
+                }
+                piece_of_complex_word = ((struct word**)word_code(x_word))[i]->name;
+            }
+        }
+        printf("\n");
+    }
+
 }
 
 void save_words(struct forth *forth) {
