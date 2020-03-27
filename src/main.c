@@ -11,14 +11,18 @@ int main(int argc, char** argv)
 {
     FILE *input;
     int i = 2;
+    struct forth forth = {0};
+    forth_init(&forth, stdin, MAX_DATA, MAX_STACK, MAX_RETURN);
+    words_add(&forth);    
+    
     if (argc != 1){
-        struct forth forth = {0};
+        
         if((input = fopen(argv[1], "r")) == NULL){
             printf("Can't open file %s\n", argv[1]);
             return 0;
-        }    
-        forth_init(&forth, input, MAX_DATA, MAX_STACK, MAX_RETURN);
-        words_add(&forth);
+        }
+        forth.input = input;
+        words_add(&forth); 
         forth_run(&forth);
         fclose(input);
         
@@ -29,26 +33,27 @@ int main(int argc, char** argv)
                     return 0;
                 }
                 forth.input = input;
-                
+                words_add(&forth); 
                 forth_run(&forth);
                 fclose(input);
             }
             else{
                 forth.input = stdin;
+                words_add(&forth); 
                 forth_run(&forth);
             }
             i++;
         }
-        forth_free(&forth);
-        return 0;
+        
+        
         
     } else {
-        struct forth forth = {0};
-        forth_init(&forth, stdin, MAX_DATA, MAX_STACK, MAX_RETURN);
-        words_add(&forth);
+        
+        
         forth_run(&forth);
-        forth_free(&forth);
+        
         
     }
+    forth_free(&forth);
     return 0;
 }

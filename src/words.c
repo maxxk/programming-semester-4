@@ -366,10 +366,13 @@ void decompile(struct forth *forth)
     if (word == NULL){
         printf("unknown word %s \n", buffer);
     } else {
-        printf("%s ", word->name);
+        
         if(word->compiled == 0){
+            printf("%s ", buffer);
             printf("is codeword pointer: %ld \n", *(cell*)word);
-        } else {  
+        } else {
+            
+            printf(": %s ", word->name);  
             part_name = ((struct word**)word_code(word))[0]->name;
             
             while (strcmp(part_name, "exit") != 0) {
@@ -386,7 +389,9 @@ void decompile(struct forth *forth)
                 i++;
                 part_name = ((struct word**)word_code(word))[i]->name;
             } 
+            printf(";\n");
         }
+        
     
 
     }
