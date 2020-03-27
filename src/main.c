@@ -22,7 +22,7 @@ int main(int argc, char** argv)
             return 0;
         }
         forth.input = input;
-        words_add(&forth); 
+        
         forth_run(&forth);
         fclose(input);
         
@@ -33,13 +33,13 @@ int main(int argc, char** argv)
                     return 0;
                 }
                 forth.input = input;
-                words_add(&forth); 
+                 
                 forth_run(&forth);
                 fclose(input);
             }
             else{
                 forth.input = stdin;
-                words_add(&forth); 
+                
                 forth_run(&forth);
             }
             i++;
