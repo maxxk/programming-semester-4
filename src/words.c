@@ -5,8 +5,6 @@
 
 #include "words.h"
 
-static void line_comment(struct forth *forth);
-
 void words_add(struct forth *forth)
 {
     int status = 0;
@@ -61,11 +59,145 @@ void words_add(struct forth *forth)
     forth_add_codeword(forth, "find", find);
     forth_add_codeword(forth, ",", comma);
     forth_add_codeword(forth, "next", next);
-    forth_add_codeword(forth, "\\", line_comment);
+
+    forth_add_codeword(forth, "save", save_words);
+    forth_add_codeword(forth, "load", load_words);
+
+    forth_add_codeword(forth, "see", decompile_words);
 
     status = forth_add_compileword(forth, "square", square);
     assert(!status);
 }
+
+void decompile_words(struct forth* forth) {
+    char buffer[MAX_WORD+1];
+    size_t length;
+    char* piece_of_complex_word;
+    int i = 0;
+
+    read_word(forth->input, MAX_WORD, buffer, &length);
+    uint8_t u_length = (uint8_t)length;
+
+    const struct word *x_word = word_find(forth->latest, u_length, buffer);
+    if (x_word == NULL){
+        printf("unknown word %s \n", buffer);
+    } else {
+        printf("%s : ", x_word->name);
+        if(!x_word->compiled) {
+            printf("It is codeword, its pointer is %ld", *(cell*)(x_word));
+        } else {
+            piece_of_complex_word = ((struct word**)word_code(x_word))[0]->name;
+
+            while(strcmp(piece_of_complex_word, "exit") != 0){
+                i++;
+                if(strcmp(piece_of_complex_word, "lit") == 0){
+                    printf("%ld ", ((cell*)word_code(x_word))[i]);
+                    i++;
+                } else {
+                    printf("%s ", piece_of_complex_word);
+                }
+                piece_of_complex_word = ((struct word**)word_code(x_word))[i]->name;
+            }
+        }
+        printf("\n");
+    }
+
+}
+
+void save_words(struct forth *forth) {
+    char buffer[MAX_WORD+1];
+    size_t length;
+
+    read_word(forth->input, MAX_WORD, buffer, &length);
+
+    FILE *file = fopen(buffer, "w");
+    int i;
+
+    struct word *last_word = forth->latest;
+    struct word *cur;
+
+    while (  strcmp(last_word->name, "square") != 0  ) {
+        if (!last_word->compiled) {
+            last_word = last_word->next;
+            continue;
+        }
+
+        fprintf(file, "%s :  ", last_word->name);
+        i = 0;
+        cur = (struct word*)(((cell*)word_code(last_word))+i);
+        while( strcmp( cur->next->name, "exit") != 0 ) {
+            fprintf(file, "%s ", cur->next->name);
+            i++;
+            cur = (struct word*)(((cell*)word_code(last_word))+i);
+        }
+        fprintf(file, ";\n");
+        last_word = last_word->next;
+    }
+    fclose(file);
+}
+
+void load_words(struct forth *forth) {
+    char buffer[MAX_WORD+1];
+    size_t length;
+    FILE *file;
+
+    int i;
+    int status = 0;
+    int words_number = 0;
+    bool search_for_new_word = true;
+
+    char *name;
+    char **words;
+
+
+    read_word(forth->input, MAX_WORD, buffer, &length);
+
+    file = fopen(buffer, "r");
+
+    while (fscanf(file, "%s", buffer) != EOF) {
+        if (!strcmp(buffer, ":")) {
+            //Ничего не делаем, идем дальше
+        } else {
+            if (search_for_new_word) {
+                name = (char*)malloc(MAX_WORD*sizeof(char));
+                words = (char**)malloc(150*sizeof(char*));
+                for (i = 0; i < 150; i++) {
+                    words[i] = (char*)malloc(MAX_WORD*sizeof(char));
+                }
+
+                strncpy( name, buffer, MAX_WORD);
+                name[MAX_WORD-1]=0;
+                printf("name: %s\n", name);
+                words_number = 0;
+                search_for_new_word = false;
+
+            } else {
+                if (!strcmp(buffer, ";")) {
+                    //В конец ставим exit, остальные зануляем
+                    words[words_number] = "exit";
+                    for (i = (words_number+1); i < 150; i++) {
+                        words[i] = 0;
+                    }
+                    status = forth_add_compileword(forth, (const char*)name, (const char**)words);
+                    assert(!status);
+                    free(name);
+                    free(words);
+
+                    search_for_new_word = true;
+                } else {
+                    for (i = 0; i < (int)strlen(buffer); i++) {
+                        words[words_number][i] = buffer[i];
+                    }
+                    printf("\t\t%s\n", words[words_number]);
+                    words_number++;
+                }
+            }
+        }
+
+    }
+
+}
+
 
 void drop(struct forth *forth) {
     forth_pop(forth);
@@ -349,12 +481,4 @@ void interpreter_stub(struct forth *forth)
     (void)forth;
     printf("ERROR: return stack underflow (must exit to interpreter)\n");
     exit(2);
-}
-
-static void line_comment(struct forth *forth)
-{
-    int c = 0;
-    do {
-        c = fgetc(forth->input);
-    } while (c > 0 && c != '\n');
 }
