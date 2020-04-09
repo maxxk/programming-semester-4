@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+
+    <h1>HTML</h1>
+    <h2>What is HTML?</h2>
+
+<pre>
+void* thread_worker(void* args)
+{
+    struct thread_args *my_args = (struct thread_args*)args;
+    while (1) {
+        printf("%d ", *my_args->i);
+        pthread_mutex_lock(my_args->mutex);
+        *my_args->i += 1;
+        //pthread_mutex_unlock(my_args->mutex);
+    }
+}
+</pre>    
+(Preformatted content — заранее отформатированное содержимое)
+    HTML — <strong>hypertext</strong> <em>markup</em> <br> language
+
+    Тэг («метки»)
+    <a href="https://wikipedia.org"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="></a>
+    <h1 contenteditable="true" a="b"> Заголовок </h1>
+
+    <ol>
+        <li>Элемент
+        <li>Упорядоченного
+        <li>Списка
+    </ol>
+    <ul>
+        <li>Элемент
+            <li>Неупорядоченного
+            <li>Списка
+    </ul>
+
+    <div>
+        Фра<span style="color: red">гмен</span>т 1
+    </div>
+    <div>
+        Фрагмент 2
+    </div>
+
+</body>
+</html>
+CSS : выбирать фрагменты дерева и применять к ним особое оформление
