@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+
+    <h1>HTML</h1>
+    <h2>What is HTML?</h2>
+
+<pre>
+void* thread_worker(void* args)
+{
+    struct thread_args *my_args = (struct thread_args*)args;
+    while (1) {
+        printf("%d ", *my_args->i);
+        pthread_mutex_lock(my_args->mutex);
+        *my_args->i += 1;
+        //pthread_mutex_unlock(my_args->mutex);
+    }
+}
+</pre>    
+(Preformatted content — заранее отформатированное содержимое)
+    HTML — <strong>hypertext</strong> <em>markup</em> <br> language
+
+    <p>
+        123
+    </p>
+    <p>456</p>
+
+    Тэг («метки»)
+    <a href="https://wikipedia.org"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="></a>
+    <h1 contenteditable="true" a="b"> Заголовок </h1>
+
+    <ol>
+        <li>Элемент
+        <li>Упорядоченного
+        <li>Списка
+    </ol>
+    <ul>
+        <li>Элемент
+            <li>Неупорядоченного
+            <li>Списка
+    </ul>
+
+    <div style="background-color: rgb(65, 105, 145);">
+        Фра<span class="red">гмен</span>т 1
+    </div>
+    <div>
+        Фра<p>г<span>м</span>е</p>нт 2
+    </div>
+
+    <span>CSS</span> : выбирать фрагменты дерева и применять к ним особое оформление
+    (Cascading Style Sheets)
+
+    <div style="display: inline;">
+    1. Выбор фрагментов дерева (селектор, selector)
+    - имя тэга
+    - структура дерева (от предков к потомкам)
+    - комбинаторы: + (рядом стоящие),
+    ~ (на одном уровне),
+    > (непосредственный потомок)
+    </div>
+
+    <div style="display: inline-block;" class="red">
+    2. Применение атрибутов к выбранному поддереву.
+    атрибут: значение;
+
+    2. Применение атрибутов к выбранному поддереву.
+    атрибут: значение;
+
+    2. Применение атрибутов к выбранному поддереву.
+    атрибут: значение;
+
+    2. Применение атрибутов к выбранному поддереву.
+    атрибут: значение;
+    </div>
+    Box model
+
+    CSS-классы
+
+
+
+    <style type="text/css">
+    .blue {
+        background-color: lightblue;
+    }
+    div span.red {
+        background-color: rgb(65, 105, 145);
+        color: red;
+    }
+    div + div {
+        border: 5px solid firebrick;
+        display: inline
+    }
+    td {
+        border: 1px dashed black;
+    }
+
+    #hide-table:checked + table {
+        display: none;
+    }
+    </style>
+
+<label for="hide-table">Hide table</label>
+<input type="checkbox" id="hide-table">
+<table>
+    <tr><td>Table row</td><td rowspan="2"> 2. Применение
+        <div class="blue">атрибутов к выбра</div>нному поддереву.
+        атрибут: значение; </td></tr>
+
+    <tr><td colspan="1">    2. Применение атрибутов к выбранному поддереву.
+        атрибут: значение;
+    
+        2. Применение атрибутов к выбранному поддереву.
+        атрибут: значение;
+    
+        2. Применение атрибутов к выбранному поддереву.
+        атрибут: значение;
+    </td></tr>
+</table>
+
+<script type="text/javascript">
+for (let i = 0; i < 10; i++) {
+    let elements = document.querySelectorAll("td");
+    elements[i].innerHTML = "i";
+}
+</script>
+
+</body>
+</html>
+
