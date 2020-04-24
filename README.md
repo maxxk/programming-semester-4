@@ -250,55 +250,6 @@ ipython-sql: https://github.com/catherinedevlin/ipython-sql
 SchemaSpy (визуализация схемы БД): http://schemaspy.org/sample/relationships.html
 Примеры: https://github.com/royalosyin/Practice-SQL-with-SQLite-and-Jupyter-Notebook
 
-Данные представляются в виде «отношений» — кортежи пар (атрибут, значение).
-(Label₁ × Int) × (Label₂ × String) ...
-( ("ФИО", "Иванов Иван Иванович"), ("Телефон", "+7000000000") )
-
-Операторы:
-- проекция: выбрать значения по атрибутам (Project("ФИО"))
-- фильтр по предикату (Filter(predicate))
-- (sql) сортировка
-
-- соединение (join) (ФИО, Телефон) (Телефон, Текст сообщения)
-(ФИО, Телефон, Текст сообщения)
-(выборку из декартова произведения отношений)
-
-SQL (Structured Query Language), есть стандарт
-Свободные реализации:
-SQLite (firefox — закладки, история, настройки; iOS и Android — сообщения, CoreData, Python)
-PostgreSQL
-MySQL (MariaDB)
-
-Несвободные реализации:
-IBM DB2, Microsoft SQL Server, Oracle Database
-
-SELECT (проекция)
-FROM (отношения, из которых мы берём данные, в том числе и подзапросы)
-[    JOIN (и соединений между ними)]
-[WHERE (фильтрация)]
-[GROUP BY (агрегирование)]
-[HAVING (фильтр по агрегатам)]
-[ORDER BY (сортировка)]
-[LIMIT количество OFFSET (пропустить)]
-
-Агрегирование
-COUNT, MAX, SUM, AVG
-
-window functions
-
-Декларативные языки программирования
-"язык программирования 4 поколения" (C — 3 поколение, Python ­— "3+" list comprehensions)
-[ (a, b, c) ]
-
-
-"структуры данных и алгоритмы на выбор"
-b-tree
-
-Приложение (C,C++,Python,JavaScript) ↔ СУБД (SQL) 
-ORM (Object-Relational Mapping)
-    Приложение — набор классов ↔ СУБД — отношения
-    Позволяют писать запросы в терминах графовой структуры
-
 ## Материалы по HTML
 http://jsfiddle.net/ondras/hYfN3/
 http://matt.might.net/articles/rendering-mathematical-functions-in-javascript-with-canvas-html/
