@@ -1,5 +1,5 @@
-#include <assert.h>
 #include <stdio.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -99,10 +99,15 @@ void decompile_words(struct forth* forth) {
                 piece_of_complex_word = ((struct word**)word_code(x_word))[i]->name;
             }
         }
-        printf("\n");
+        printf(";\n");
     }
 
 }
+
+struct word_stack{
+    struct word * wordptr;
+    struct word_stack * next;
+};
 
 void save_words(struct forth *forth) {
     char buffer[MAX_WORD+1];
@@ -113,15 +118,28 @@ void save_words(struct forth *forth) {
     FILE *file = fopen(buffer, "w");
     int i;
 
+    struct word_stack *stack = NULL;
     struct word *last_word = forth->latest;
     struct word *cur;
+    struct word_stack *newelem;
 
-    while (  strcmp(last_word->name, "square") != 0  ) {
-        if (!last_word->compiled) {
-            last_word = last_word->next;
-            continue;
+    while ( last_word->next ) {
+        if ( last_word->compiled ) {
+            if ( stack ) {
+                newelem = malloc( sizeof( struct word_stack ) );
+                newelem->wordptr = last_word;
+                newelem->next = stack;
+                stack = newelem;
+            } else {
+                stack = malloc( sizeof( struct word_stack ) );
+                stack->wordptr = last_word;
+                stack->next = NULL;
+            }
         }
-
+        last_word = last_word->next;
+    }
+    while ( stack ) {
+        last_word = stack->wordptr; 
         fprintf(file, "%s :  ", last_word->name);
         i = 0;
         cur = (struct word*)(((cell*)word_code(last_word))+i);
@@ -131,40 +149,82 @@ void save_words(struct forth *forth) {
             cur = (struct word*)(((cell*)word_code(last_word))+i);
         }
         fprintf(file, ";\n");
-        last_word = last_word->next;
+        newelem = stack;
+        stack = stack->next;
+        free( newelem );
     }
     fclose(file);
 }
 
+struct word_list {
+        char * wordptr;
+        struct word_list * next;
+};
+
+static
+struct word_list *
+word_list_push_end(
+    struct word_list * end,
+    char * new_elem ) {
+        if ( !end ) {
+            end = malloc( sizeof( struct word_list ) );
+            end->next = NULL;
+            end->wordptr = new_elem;
+            return end;
+        } else {
+            end->next = malloc( sizeof( struct word_list ) );
+            end->next->wordptr = new_elem;
+            end->next->next = NULL;
+            return end->next;
+        }
+}
+
+static
+struct word_list *
+word_list_pop_begin(
+    struct word_list * head ) {
+        struct word_list *copy;
+
+        if ( !head ) return NULL;
+        copy = head;
+        head = head->next;
+        free(copy);
+        return head;
+}
+
+
 void load_words(struct forth *forth) {
     char buffer[MAX_WORD+1];
     size_t length;
+    char format[12];
     FILE *file;
+    char *wordbuf;
 
-    int i;
     int status = 0;
     int words_number = 0;
     bool search_for_new_word = true;
+    int i;
 
     char *name;
     char **words;
+
+    struct word_list *list_of_words = NULL;
+    struct word_list * words_last = NULL;
 
 
     read_word(forth->input, MAX_WORD, buffer, &length);
 
     file = fopen(buffer, "r");
-
-    while (fscanf(file, "%s", buffer) != EOF) {
+    snprintf( format, sizeof(format), "%%%ds", MAX_WORD+1 );
+    while ( fscanf( file, format, buffer ) != EOF ) {
         if (!strcmp(buffer, ":")) {
             //Ничего не делаем, идем дальше
         } else {
             if (search_for_new_word) {
                 name = (char*)malloc(MAX_WORD*sizeof(char));
-                words = (char**)malloc(150*sizeof(char*));
-                for (i = 0; i < 150; i++) {
-                    words[i] = (char*)malloc(MAX_WORD*sizeof(char));
-                }
-
+                list_of_words = NULL;
+                words_last = NULL;
+                //words = (char**)malloc(150*sizeof(char*));
                 strncpy( name, buffer, MAX_WORD);
                 name[MAX_WORD-1]=0;
                 printf("name: %s\n", name);
@@ -174,10 +234,24 @@ void load_words(struct forth *forth) {
             } else {
                 if (!strcmp(buffer, ";")) {
                     //В конец ставим exit, остальные зануляем
-                    words[words_number] = "exit";
-                    for (i = (words_number+1); i < 150; i++) {
-                        words[i] = 0;
+                    wordbuf = malloc( MAX_WORD * sizeof(char) );
+                    snprintf( wordbuf, MAX_WORD, "exit" );
+                    words_last = word_list_push_end( words_last, wordbuf );
+                    if ( !list_of_words ) {
+                        list_of_words = words_last;
                     }
+                    words_number++;
+                    words = malloc( (words_number+1) * sizeof( char* ) );
+                    i = 0;
+                    while ( ( list_of_words ) && ( i < words_number ) ) {
+                        words[i] = list_of_words->wordptr;
+                        i++;
+                        list_of_words = word_list_pop_begin( list_of_words );
+                        if ( !list_of_words ) {
+                            words_last = NULL;
+                        }
+                    }
+                    words[ words_number ] = 0;
                     status = forth_add_compileword(forth, (const char*)name, (const char**)words);
                     assert(!status);
                     free(name);
@@ -185,10 +259,14 @@ void load_words(struct forth *forth) {
 
                     search_for_new_word = true;
                 } else {
-                    for (i = 0; i < (int)strlen(buffer); i++) {
-                        words[words_number][i] = buffer[i];
+                    //printf("%s", buffer );
+                    wordbuf = malloc( MAX_WORD * sizeof(char) );
+                    strncpy( wordbuf, buffer, MAX_WORD );
+                    words_last = word_list_push_end( words_last, wordbuf );
+                    if ( !list_of_words ) {
+                        list_of_words = words_last;
                     }
-                    printf("\t\t%s\n", words[words_number]);
+                    printf("\t\t%s\n", wordbuf);
                     words_number++;
                 }
             }
