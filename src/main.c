@@ -18,7 +18,12 @@ int main(int argc, char** argv)
     if (argc != 1){
         
         if((input = fopen(argv[1], "r")) == NULL){
-            printf("Can't open file %s\n", argv[1]);
+            if(*argv[1] == '-'){
+                printf("Can't open file ""-"", if you want to run program without input files, don't use ""'-'"" in the end\n");
+            }
+            else{
+                printf("Can't open file %s\n", argv[1]);
+            }
             return 0;
         }
         forth.input = input;

@@ -60,6 +60,8 @@ void words_add(struct forth *forth)
     forth_add_codeword(forth, ",", comma);
     forth_add_codeword(forth, "next", next);
     forth_add_codeword(forth, "see", decompile);
+    forth_add_codeword(forth, "save", save);
+    forth_add_codeword(forth, "load", load);
 
     status = forth_add_compileword(forth, "square", square);
     assert(!status);
@@ -400,5 +402,66 @@ void decompile(struct forth *forth)
 
 
 }
+void save(struct forth *forth)
+{
+    FILE* save_file;
+    char buffer[MAX_WORD+1];
+    size_t length;
+    const struct word *word;
+    char* part_name;
+    int i = 0;
+    read_word(forth->input, MAX_WORD, buffer, &length);
+    assert(length > 0);
+    if((save_file = fopen(buffer, "w")) == NULL){
+            printf("Can't open file %s\n", buffer);
 
+            
+    } else{
+        word = forth->latest;
+        while(word){
+            if(word->compiled != 0 ){
+                fprintf(save_file, ": %s ", word->name);  
+                part_name = ((struct word**)word_code(word))[0]->name;
+                
+                while (strcmp(part_name, "exit") != 0) {
+                    
+                    if(strcmp(part_name, "lit") == 0){
+                        i++;
+                        fprintf(save_file, "%ld ", ((cell*)word_code(word))[i]);
+                        
+                    }
+                    else{
+                        fprintf(save_file, "%s ", part_name);
+                    }
+                    
+                    i++;
+                    part_name = ((struct word**)word_code(word))[i]->name;
+                } 
+                fprintf(save_file, ";\n");
+            }
+            i=0;
+            word = word->next;
+        } 
+        
+    } 
+    fclose(save_file);
+}
 
+void load(struct forth *forth)
+{
+    FILE* save_file;
+    char buffer[MAX_WORD+1];
+    size_t length;
+    read_word(forth->input, MAX_WORD, buffer, &length);
+    assert(length > 0);
+    if((save_file = fopen(buffer, "r")) == NULL){
+        printf("Can't open file %s\n", buffer);
+        
+    } else{
+        forth->input = save_file;
+            
+        forth_run(forth);
+        fclose(save_file);
+        forth->input = stdin;
+    }
+}
