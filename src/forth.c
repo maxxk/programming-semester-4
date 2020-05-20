@@ -101,7 +101,7 @@ const void* word_code(const struct word *word)
     return (const void*)((uint8_t*)word + size);
 }
 
-const struct word* word_find(const struct word* word,
+struct word* word_find(struct word* word,
     uint8_t length, const char name[length])
 {
     while (word) {
@@ -208,6 +208,7 @@ enum forth_result forth_run(struct forth* forth)
             forth_emit(forth, (cell)word);
         }
     }
+    
     return read_result;
 }
 
@@ -230,6 +231,7 @@ static void forth_run_number(struct forth *forth,
 
 static void forth_run_word(struct forth *forth, const struct word *word)
 {
+    
     do {
         //printf("%.*s\n", (int)word->length, word->name);
         // FIXME: (1 балл) как избавиться от этого условия
@@ -237,8 +239,14 @@ static void forth_run_word(struct forth *forth, const struct word *word)
         if (*forth->executing != forth->stopword) {
             forth->executing += 1;
         }
+        if (word->breakpoint){
+            printf("break point on word %s\n", word->name);
+            
+            break;
+        }
         if (!word->compiled) {
             // ISO C forbids conversion of object pointer to function pointer type
+
             const function code = ((struct { function fn; }*)word_code(word))->fn;
             code(forth);
         } else {

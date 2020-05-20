@@ -54,3 +54,6 @@ void interpreter_stub(struct forth *forth);
 void decompile(struct forth *forth);
 void save(struct forth *forth);
 void load(struct forth *forth);
+
+void add_break(struct forth *forth);
+void remove_break(struct forth *forth);

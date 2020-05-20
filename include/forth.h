@@ -14,6 +14,7 @@ struct word {
     bool compiled;
     bool hidden;
     bool immediate;
+    bool breakpoint;
     uint8_t length;
     char name[];
 };
@@ -26,6 +27,7 @@ struct forth {
     struct word *latest;
     struct word *stopword;
     bool is_compiling;
+    
 
     FILE* input;
 
@@ -41,7 +43,7 @@ struct forth {
 struct word* word_add(struct forth *forth,
     uint8_t length, const char name[length]);
 const void* word_code(const struct word *word);
-const struct word* word_find(const struct word* first,
+struct word* word_find(struct word* first,
     uint8_t length, const char name[length]);
 
 typedef void (*function)(struct forth *forth);

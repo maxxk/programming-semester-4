@@ -63,6 +63,9 @@ void words_add(struct forth *forth)
     forth_add_codeword(forth, "save", save);
     forth_add_codeword(forth, "load", load);
 
+    forth_add_codeword(forth, "break", add_break);
+    forth_add_codeword(forth, "unbreak", remove_break);
+
     status = forth_add_compileword(forth, "square", square);
     assert(!status);
 }
@@ -464,4 +467,37 @@ void load(struct forth *forth)
         fclose(save_file);
         forth->input = stdin;
     }
+}
+
+void add_break(struct forth *forth)
+{
+    struct word* word;
+    char buffer[MAX_WORD+1];
+    size_t length;
+    read_word(forth->input, MAX_WORD, buffer, &length);
+    assert(length > 0);
+    word = word_find(forth->latest, (uint8_t)length, buffer);
+    if (word == NULL){
+        printf("unknown word %s \n", buffer);
+    } else {
+        word->breakpoint = 1;
+    }
+    
+}
+
+void remove_break(struct forth *forth)
+{
+    
+    struct word* word;
+    char buffer[MAX_WORD+1];
+    size_t length;
+    read_word(forth->input, MAX_WORD, buffer, &length);
+    assert(length > 0);
+    word = word_find(forth->latest, (uint8_t)length, buffer);
+    if (word == NULL){
+        printf("unknown word %s \n", buffer);
+    } else {
+        word->breakpoint = 0;
+    }
+    
 }
